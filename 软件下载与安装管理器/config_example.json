@@ -1,0 +1,33 @@
+{
+    "download_dir": "C:\\Program Files\\SoftwareDownloads",
+    "install_dir": "C:\\Program Files",
+    "max_workers": 4,
+    "software_list": [
+        {
+            "name": "chrome",
+            "enabled": true,
+            "description": "Google Chrome Browser"
+        },
+        {
+            "name": "python",
+            "enabled": true,
+            "description": "Python Programming Language"
+        },
+        {
+            "name": "vscode",
+            "enabled": true,
+            "description": "Visual Studio Code Editor"
+        },
+        {
+            "name": "notepadpp",
+            "enabled": true,
+            "description": "Notepad++ Text Editor (Windows only)"
+        },
+        {
+            "name": "custom_software",
+            "enabled": false,
+            "url": "https://example.com/software.exe",
+            "description": "Custom software example with direct URL"
+        }
+    ]
+} 

@@ -1,0 +1,2451 @@
+@echo off
+:: Merged BAT file created by quanshi.py
+:: Created on 2025-06-16 18:08:04
+:: Contains the following files:
+::   - merged.bat
+::   - start_quanshi.bat
+::   - winget_categories.bat
+::   - winget_custom_install.bat
+::   - winget_diff.bat
+::   - winget_export_import.bat
+::   - winget_install.bat
+::   - winget_master.bat
+::   - winget_repair.bat
+::   - winget_report.bat
+::   - winget_scheduled_tasks.bat
+::   - winget_search.bat
+::   - winget_update.bat
+
+
+:==============================================================================
+:: START OF merged.bat
+:==============================================================================
+
+
+:==============================================================================
+:: END OF merged.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF start_quanshi.bat
+:==============================================================================
+
+:: Quanshi BAT文件合并系统 - 启动脚本
+:: 此脚本用于在Windows系统上快速启动Quanshi系统
+
+echo 正在启动Quanshi BAT文件合并系统...
+echo.
+
+:: 检查Python是否安装
+python --version >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 错误: 未检测到Python安装!
+    echo 请安装Python 3.6或更高版本后再试。
+    echo 您可以从 https://www.python.org/downloads/ 下载Python。
+    echo.
+    pause
+    exit /b 1
+)
+
+:: 检查启动器文件是否存在
+if not exist quanshi_launcher.py (
+    echo 错误: 未找到quanshi_launcher.py文件!
+    echo 请确保所有Quanshi系统文件都在当前目录中。
+    echo.
+    pause
+    exit /b 1
+)
+
+:: 启动Quanshi系统
+python quanshi_launcher.py
+
+:: 如果启动器返回错误，显示错误信息
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo Quanshi系统运行时出现错误，错误代码: %ERRORLEVEL%
+    echo.
+    pause
+)
+
+exit /b 
+:==============================================================================
+:: END OF start_quanshi.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_categories.bat
+:==============================================================================
+
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo     Windows分类软件安装工具 (基于WinGet)
+echo ===================================================
+echo.
+
+:: 检查WinGet是否安装
+where winget >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 未找到WinGet，请确保您的Windows版本支持WinGet并已安装。
+    echo WinGet在Windows 10 1709及更高版本中可用。
+    goto :EOF
+)
+
+:: 检查是否以管理员身份运行
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 警告: 此脚本未以管理员身份运行，某些软件可能无法正确安装。
+    echo 建议以管理员身份运行此脚本。
+    echo.
+    choice /C YN /M "是否继续？(Y/N)"
+    if !ERRORLEVEL! EQU 2 goto :EOF
+    echo.
+)
+
+:: 创建目录
+set "categories_dir=%~dp0软件分类"
+if not exist "%categories_dir%" mkdir "%categories_dir%"
+
+:: 检查分类目录
+if not exist "%categories_dir%\开发工具.txt" (
+    echo 未找到分类文件，正在创建示例分类...
+    
+    :: 创建开发工具分类
+    (
+        echo # 开发工具列表
+        echo Microsoft.VisualStudioCode      # VS Code
+        echo Git.Git                         # Git版本控制
+        echo Python.Python.3.12              # Python 3.12
+        echo JetBrains.PyCharm.Community     # PyCharm社区版
+        echo Microsoft.VisualStudio.2022.Community # Visual Studio 2022社区版
+        echo OpenJS.NodeJS                   # Node.js
+        echo Docker.DockerDesktop            # Docker桌面版
+    ) > "%categories_dir%\开发工具.txt"
+    
+    :: 创建办公软件分类
+    (
+        echo # 办公软件列表
+        echo Microsoft.Office                # Microsoft Office
+        echo Tencent.TencentMeeting         # 腾讯会议
+        echo Alibaba.DingTalk               # 钉钉
+        echo Tencent.WeChat.Work            # 企业微信
+        echo Youdao.YoudaoDict              # 有道词典
+        echo Kingsoft.WPSOffice             # WPS Office
+        echo Mozilla.Thunderbird            # Thunderbird邮件客户端
+    ) > "%categories_dir%\办公软件.txt"
+    
+    :: 创建系统工具分类
+    (
+        echo # 系统工具列表
+        echo Microsoft.PowerToys            # 微软PowerToys
+        echo Microsoft.WindowsTerminal      # Windows终端
+        echo 7zip.7zip                      # 7-Zip压缩工具
+        echo voidtools.Everything           # Everything搜索工具
+        echo CPUID.CPU-Z                    # CPU-Z硬件监测
+        echo TechPowerUp.GPU-Z              # GPU-Z显卡监测
+        echo REALiX.HWiNFO                  # HWiNFO系统信息
+        echo Notepad++.Notepad++            # Notepad++文本编辑器
+    ) > "%categories_dir%\系统工具.txt"
+    
+    :: 创建浏览器分类
+    (
+        echo # 浏览器列表
+        echo Google.Chrome                  # Google Chrome
+        echo Mozilla.Firefox                # Mozilla Firefox
+        echo Microsoft.Edge                 # Microsoft Edge
+        echo Opera.Opera                    # Opera浏览器
+        echo Brave.Brave                    # Brave浏览器
+    ) > "%categories_dir%\浏览器.txt"
+    
+    :: 创建聊天通讯分类
+    (
+        echo # 聊天通讯软件列表
+        echo Tencent.WeChat                 # 微信
+        echo Tencent.QQ                     # QQ
+        echo Alibaba.AliWangwang            # 阿里旺旺
+        echo Telegram.TelegramDesktop       # Telegram桌面版
+        echo Discord.Discord                # Discord
+    ) > "%categories_dir%\聊天通讯.txt"
+    
+    :: 创建多媒体分类
+    (
+        echo # 多媒体软件列表
+        echo VideoLAN.VLC                   # VLC媒体播放器
+        echo PotPlayer.PotPlayer            # PotPlayer视频播放器
+        echo Daum.PotPlayer                 # PotPlayer另一个版本
+        echo Tencent.QQMusic                # QQ音乐
+        echo NetEase.CloudMusic             # 网易云音乐
+        echo GIMP.GIMP                      # GIMP图像编辑器
+        echo IrfanView.IrfanView            # IrfanView图像查看器
+    ) > "%categories_dir%\多媒体.txt"
+    
+    echo 已创建示例分类文件在: %categories_dir%
+    echo 你可以编辑这些文件来自定义每个分类的软件列表。
+    echo.
+)
+
+:: 创建日志文件
+set "logfile=%~dp0winget_install_log_%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt"
+set "logfile=%logfile: =0%"
+echo 日志文件将保存在: %logfile%
+echo.
+
+:: 初始化日志文件
+echo Windows分类软件安装日志 - %date% %time% > "%logfile%"
+echo ============================================== >> "%logfile%"
+echo. >> "%logfile%"
+
+:menu
+cls
+echo 请选择要安装的软件分类:
+echo.
+set category_count=0
+
+:: 列出所有分类
+for %%f in ("%categories_dir%\*.txt") do (
+    set /a category_count+=1
+    set "category_name[!category_count!]=%%~nf"
+    set "category_file[!category_count!]=%%f"
+    echo [!category_count!] %%~nf
+)
+
+echo [A] 安装所有分类
+echo [E] 编辑分类
+echo [Q] 退出
+echo.
+
+set /p choice=请输入选项: 
+
+:: 处理选择
+if /i "%choice%"=="Q" goto end
+if /i "%choice%"=="A" goto install_all
+if /i "%choice%"=="E" goto edit_categories
+
+:: 检查数字选择
+set /a choice_num=%choice% 2>nul
+if %choice_num% LSS 1 goto invalid_choice
+if %choice_num% GTR %category_count% goto invalid_choice
+
+:: 安装选定分类
+call :install_category "!category_file[%choice_num%]!" "!category_name[%choice_num%]!"
+goto menu
+
+:invalid_choice
+echo.
+echo 无效的选择，请重试。
+pause
+goto menu
+
+:install_all
+echo.
+echo 将安装所有分类的软件，这可能需要较长时间。
+choice /C YN /M "是否继续？(Y/N)"
+if %ERRORLEVEL% EQU 2 goto menu
+
+for /l %%i in (1,1,%category_count%) do (
+    call :install_category "!category_file[%%i]!" "!category_name[%%i]!"
+)
+
+echo.
+echo 所有分类的软件安装已完成！
+echo 详细日志请查看: %logfile%
+echo.
+pause
+goto menu
+
+:edit_categories
+echo.
+echo 请选择要编辑的分类文件:
+echo.
+
+for /l %%i in (1,1,%category_count%) do (
+    echo [%%i] !category_name[%%i]!
+)
+
+echo [N] 创建新分类
+echo [B] 返回主菜单
+echo.
+
+set /p edit_choice=请输入选项: 
+
+if /i "%edit_choice%"=="B" goto menu
+if /i "%edit_choice%"=="N" goto create_new_category
+
+set /a edit_num=%edit_choice% 2>nul
+if %edit_num% LSS 1 goto invalid_edit
+if %edit_num% GTR %category_count% goto invalid_edit
+
+:: 打开选定的分类文件进行编辑
+start notepad "!category_file[%edit_num%]!"
+goto menu
+
+:invalid_edit
+echo.
+echo 无效的选择，请重试。
+pause
+goto edit_categories
+
+:create_new_category
+echo.
+set /p new_category=请输入新分类名称: 
+
+if "%new_category%"=="" (
+    echo 分类名称不能为空！
+    pause
+    goto edit_categories
+)
+
+set "new_file=%categories_dir%\%new_category%.txt"
+
+if exist "%new_file%" (
+    echo 该分类已存在！
+    pause
+    goto edit_categories
+)
+
+(
+    echo # %new_category%软件列表
+    echo # 格式: [软件ID] # [软件说明]
+    echo # 
+    echo # 示例:
+    echo # Microsoft.VisualStudioCode      # VS Code
+) > "%new_file%"
+
+echo.
+echo 已创建新分类: %new_category%
+echo 现在将打开编辑器以编辑该分类。
+pause
+start notepad "%new_file%"
+goto menu
+
+:install_category
+set "category_file=%~1"
+set "category_name=%~2"
+
+echo.
+echo ===================================================
+echo 正在安装 %category_name% 分类的软件...
+echo ===================================================
+echo.
+
+echo [%date% %time%] 开始安装 %category_name% 分类的软件... >> "%logfile%"
+echo. >> "%logfile%"
+
+set app_count=0
+set success_count=0
+set failed_count=0
+
+:: 读取分类文件中的软件
+for /f "tokens=1* delims= " %%a in ('type "%category_file%" ^| findstr /v "^#" ^| findstr /v "^$"') do (
+    set /a app_count+=1
+    set "app_id=%%a"
+    
+    :: 尝试提取注释作为应用名称
+    set "app_name=%%a"
+    set "comment=%%b"
+    if "%%b" NEQ "" (
+        if "!comment:~0,1!" == "#" (
+            set "app_name=!comment:~1!"
+            set "app_name=!app_name:~1!"
+        )
+    )
+    
+    echo [!app_count!] 正在安装 !app_name! (!app_id!)...
+    echo [%date% %time%] 正在安装 !app_name! (!app_id!)... >> "%logfile%"
+    
+    winget install --id !app_id! --accept-source-agreements --accept-package-agreements >> "%logfile%" 2>&1
+    
+    if !ERRORLEVEL! EQU 0 (
+        set /a success_count+=1
+        echo [成功] !app_name! 安装完成
+        echo [%date% %time%] [成功] !app_name! 安装完成 >> "%logfile%"
+    ) else (
+        set /a failed_count+=1
+        echo [失败] !app_name! 安装失败，错误代码: !ERRORLEVEL!
+        echo [%date% %time%] [失败] !app_name! 安装失败，错误代码: !ERRORLEVEL! >> "%logfile%"
+    )
+    
+    echo. >> "%logfile%"
+    echo.
+)
+
+echo %category_name% 分类安装完成！成功: %success_count%，失败: %failed_count%
+echo [%date% %time%] %category_name% 分类安装完成！成功: %success_count%，失败: %failed_count% >> "%logfile%"
+echo. >> "%logfile%"
+
+echo.
+pause
+exit /b
+
+:end
+echo.
+echo 感谢使用Windows分类软件安装工具！
+echo.
+exit /b 0 
+:==============================================================================
+:: END OF winget_categories.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_custom_install.bat
+:==============================================================================
+
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo     Windows软件自定义安装脚本 (基于WinGet)
+echo ===================================================
+echo.
+
+:: 检查WinGet是否安装
+where winget >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 未找到WinGet，请确保您的Windows版本支持WinGet并已安装。
+    echo WinGet在Windows 10 1709及更高版本中可用。
+    echo 如果您确定已安装，请尝试使用以下命令注册：
+    echo Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+    goto :EOF
+)
+
+:: 检查是否以管理员身份运行
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 警告: 此脚本未以管理员身份运行，某些软件可能无法正确安装。
+    echo 建议以管理员身份运行此脚本。
+    echo.
+    choice /C YN /M "是否继续？(Y/N)"
+    if !ERRORLEVEL! EQU 2 goto :EOF
+    echo.
+)
+
+echo WinGet版本信息:
+winget --version
+echo.
+
+:: 检查软件列表文件是否存在
+set "software_list_file=%~dp0software_list.txt"
+if not exist "%software_list_file%" (
+    echo 未找到软件列表文件 software_list.txt
+    echo 正在创建一个示例文件，请根据需要修改后再次运行此脚本。
+    
+    (
+        echo # 软件列表文件 - 每行一个软件ID，井号开头的行为注释
+        echo # 格式: [软件ID] [可选说明]
+        echo.
+        echo # 系统工具
+        echo Microsoft.PowerToys                  # PowerToys
+        echo Microsoft.WindowsTerminal            # Windows Terminal
+        echo CPUID.CPU-Z                          # CPU-Z
+        echo voidtools.Everything                 # Everything搜索工具
+        echo Notepad++.Notepad++                  # Notepad++编辑器
+        echo.
+        echo # 浏览器
+        echo Google.Chrome                        # Google Chrome
+        echo Mozilla.Firefox                      # Mozilla Firefox
+        echo Microsoft.Edge                       # Microsoft Edge
+        echo.
+        echo # 开发工具
+        echo Git.Git                              # Git版本控制
+        echo Microsoft.VisualStudioCode           # VS Code
+        echo Python.Python.3.12                   # Python 3.12
+        echo.
+        echo # 通讯工具
+        echo Tencent.WeChat                       # 微信
+        echo Tencent.QQ                           # QQ
+        echo.
+        echo # 其他工具
+        echo 7zip.7zip                            # 7-Zip解压缩
+        echo Bandisoft.Bandizip                   # Bandizip解压缩
+        echo Baidu.BaiduNetdisk                   # 百度网盘
+    ) > "%software_list_file%"
+    
+    echo 已创建示例软件列表文件: %software_list_file%
+    echo 请编辑该文件以自定义要安装的软件，然后再次运行此脚本。
+    echo.
+    pause
+    goto :EOF
+)
+
+:: 创建日志文件
+set "logfile=%~dp0winget_install_log_%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt"
+set "logfile=%logfile: =0%"
+echo 日志文件将保存在: %logfile%
+echo.
+
+:: 初始化日志文件
+echo Windows软件自动安装日志 - %date% %time% > "%logfile%"
+echo ============================================== >> "%logfile%"
+echo. >> "%logfile%"
+
+:: 读取软件列表
+echo 从 %software_list_file% 读取要安装的软件列表:
+echo ---------------------------------------------
+set "app_count=0"
+for /f "tokens=1* delims= " %%a in ('type "%software_list_file%" ^| findstr /v "^#" ^| findstr /v "^$"') do (
+    set /a "app_count+=1"
+    set "app_id[!app_count!]=%%a"
+    
+    :: 尝试提取注释作为应用名称
+    set "app_name[!app_count!]=%%a"
+    if "%%b" NEQ "" (
+        set "comment=%%b"
+        if "!comment:~0,1!" == "#" (
+            set "app_name[!app_count!]=!comment:~1!"
+            set "app_name[!app_count!]=!app_name[!app_count!]:~1!"
+        )
+    )
+    
+    echo !app_count!. !app_id[!app_count!]! - !app_name[!app_count!]!
+)
+echo ---------------------------------------------
+echo 共找到 %app_count% 个应用程序
+echo.
+
+if %app_count% EQU 0 (
+    echo 未在软件列表文件中找到任何有效的软件条目。
+    echo 请编辑文件 %software_list_file% 添加要安装的软件。
+    pause
+    goto :EOF
+)
+
+choice /C YN /M "是否继续安装上述软件？(Y/N)"
+if %ERRORLEVEL% EQU 2 goto :EOF
+echo.
+
+echo 开始安装软件...
+echo.
+
+:: 安装软件
+set "success_count=0"
+set "failed_count=0"
+
+for /l %%i in (1, 1, %app_count%) do (
+    set "current_id=!app_id[%%i]!"
+    set "current_name=!app_name[%%i]!"
+    
+    echo [%%i/%app_count%] 正在安装 !current_name! (!current_id!)...
+    echo [%date% %time%] 正在安装 !current_name! (!current_id!)... >> "%logfile%"
+    
+    winget install --id !current_id! --accept-source-agreements --accept-package-agreements >> "%logfile%" 2>&1
+    
+    if !ERRORLEVEL! EQU 0 (
+        set /a "success_count+=1"
+        echo [成功] !current_name! 安装完成
+        echo [%date% %time%] [成功] !current_name! 安装完成 >> "%logfile%"
+    ) else (
+        set /a "failed_count+=1"
+        echo [失败] !current_name! 安装失败，错误代码: !ERRORLEVEL!
+        echo [%date% %time%] [失败] !current_name! 安装失败，错误代码: !ERRORLEVEL! >> "%logfile%"
+    )
+    
+    echo. >> "%logfile%"
+    echo.
+)
+
+echo 安装完成！成功: %success_count%，失败: %failed_count%
+echo [%date% %time%] 安装完成！成功: %success_count%，失败: %failed_count% >> "%logfile%"
+echo 详细日志请查看: %logfile%
+
+:: 提示按任意键退出
+echo.
+pause
+goto :EOF 
+:==============================================================================
+:: END OF winget_custom_install.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_diff.bat
+:==============================================================================
+
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo    Windows软件差异比较工具 (基于WinGet)
+echo ===================================================
+echo.
+
+:: 检查WinGet是否安装
+where winget >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 未找到WinGet，请确保您的Windows版本支持WinGet并已安装。
+    echo WinGet在Windows 10 1709及更高版本中可用。
+    goto :EOF
+)
+
+:: 设置文件路径
+set "temp_dir=%TEMP%\winget_diff"
+set "current_export=%temp_dir%\current_installed.json"
+set "compare_export=%temp_dir%\compare_installed.json"
+set "diff_file=%temp_dir%\software_diff.txt"
+
+:: 创建临时目录
+if not exist "%temp_dir%" mkdir "%temp_dir%"
+
+:menu
+cls
+echo 选择操作:
+echo.
+echo [1] 导出当前电脑软件列表(第一步)
+echo [2] 导入对比电脑软件列表并比较(第二步)
+echo [3] 安装缺少的软件
+echo [4] 删除临时文件
+echo [5] 退出
+echo.
+set /p choice=请输入选项(1-5): 
+
+if "%choice%"=="1" goto export_current
+if "%choice%"=="2" goto import_compare
+if "%choice%"=="3" goto install_missing
+if "%choice%"=="4" goto cleanup
+if "%choice%"=="5" goto end
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto menu
+
+:export_current
+cls
+echo ===================================================
+echo           导出当前电脑已安装软件列表
+echo ===================================================
+echo.
+echo 正在导出当前电脑已安装的软件列表...
+echo 这可能需要一段时间，请耐心等待...
+echo.
+
+if exist "%current_export%" (
+    echo 警告: 已存在之前导出的文件 
+    echo 路径: %current_export%
+    echo.
+    choice /C YN /M "是否覆盖? (Y/N)"
+    if !ERRORLEVEL! EQU 2 goto menu
+)
+
+winget export -o "%current_export%" --accept-source-agreements
+
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo 导出成功! 文件保存在: %current_export%
+    echo.
+    echo 请将此文件复制到需要比较的另一台电脑上，
+    echo 并在该电脑上运行本工具的第2步进行比较。
+) else (
+    echo.
+    echo 导出失败，错误代码: %ERRORLEVEL%
+)
+
+echo.
+pause
+goto menu
+
+:import_compare
+cls
+echo ===================================================
+echo           导入对比电脑软件列表并比较
+echo ===================================================
+echo.
+
+if not exist "%current_export%" (
+    echo 错误: 未找到当前电脑的软件列表。
+    echo 请先运行第1步导出当前电脑的软件列表。
+    echo.
+    pause
+    goto menu
+)
+
+echo 请选择对比电脑软件列表文件的来源:
+echo.
+echo [1] 从其他电脑复制的JSON文件
+echo [2] 导出当前电脑作为对比基准
+echo [3] 返回主菜单
+echo.
+set /p source_choice=请输入选项(1-3): 
+
+if "%source_choice%"=="1" (
+    echo.
+    echo 请将另一台电脑导出的JSON文件路径复制到下方
+    echo 例如: C:\Users\用户名\Desktop\installed_software.json
+    echo.
+    set /p compare_file=文件路径: 
+    
+    if not exist "!compare_file!" (
+        echo 错误: 未找到指定的文件: !compare_file!
+        pause
+        goto import_compare
+    )
+    
+    copy "!compare_file!" "%compare_export%" >nul
+    goto do_compare
+)
+
+if "%source_choice%"=="2" (
+    echo.
+    echo 正在导出当前电脑软件列表作为对比基准...
+    echo.
+    winget export -o "%compare_export%" --accept-source-agreements
+    
+    if %ERRORLEVEL% NEQ 0 (
+        echo 导出失败，错误代码: %ERRORLEVEL%
+        pause
+        goto menu
+    )
+    
+    goto do_compare
+)
+
+if "%source_choice%"=="3" goto menu
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto import_compare
+
+:do_compare
+cls
+echo ===================================================
+echo                 比较软件差异
+echo ===================================================
+echo.
+echo 正在比较软件列表差异...
+echo.
+
+:: 创建或清空差异文件
+echo 软件差异比较报告 > "%diff_file%"
+echo 生成时间: %date% %time% >> "%diff_file%"
+echo ================================================== >> "%diff_file%"
+echo. >> "%diff_file%"
+
+:: 提取软件ID列表
+set "current_list=%temp_dir%\current_list.txt"
+set "compare_list=%temp_dir%\compare_list.txt"
+
+:: 提取当前电脑软件ID
+type "%current_export%" | findstr /C:"PackageIdentifier" > "%current_list%"
+:: 提取对比电脑软件ID
+type "%compare_export%" | findstr /C:"PackageIdentifier" > "%compare_list%"
+
+:: 清理提取的ID
+set "current_list_clean=%temp_dir%\current_list_clean.txt"
+set "compare_list_clean=%temp_dir%\compare_list_clean.txt"
+
+:: 清理ID文本
+type nul > "%current_list_clean%"
+for /f "tokens=2 delims=: " %%a in ('type "%current_list%"') do (
+    set "line=%%a"
+    set "line=!line:"=!"
+    set "line=!line:,=!"
+    echo !line! >> "%current_list_clean%"
+)
+
+type nul > "%compare_list_clean%"
+for /f "tokens=2 delims=: " %%a in ('type "%compare_list%"') do (
+    set "line=%%a"
+    set "line=!line:"=!"
+    set "line=!line:,=!"
+    echo !line! >> "%compare_list_clean%"
+)
+
+:: 找出当前电脑独有的软件（在对比电脑上缺少的软件）
+echo 在当前电脑上安装但在对比电脑上缺少的软件: >> "%diff_file%"
+echo ================================================== >> "%diff_file%"
+set found_missing=0
+for /f "usebackq tokens=*" %%a in ("%current_list_clean%") do (
+    set found=0
+    for /f "usebackq tokens=*" %%b in ("%compare_list_clean%") do (
+        if "%%a"=="%%b" set found=1
+    )
+    if !found!==0 (
+        echo %%a >> "%diff_file%"
+        set found_missing=1
+    )
+)
+if !found_missing!==0 echo [无] >> "%diff_file%"
+echo. >> "%diff_file%"
+
+:: 找出对比电脑独有的软件（在当前电脑上缺少的软件）
+echo 在对比电脑上安装但在当前电脑上缺少的软件: >> "%diff_file%"
+echo ================================================== >> "%diff_file%"
+set found_missing=0
+for /f "usebackq tokens=*" %%a in ("%compare_list_clean%") do (
+    set found=0
+    for /f "usebackq tokens=*" %%b in ("%current_list_clean%") do (
+        if "%%a"=="%%b" set found=1
+    )
+    if !found!==0 (
+        echo %%a >> "%diff_file%"
+        set found_missing=1
+    )
+)
+if !found_missing!==0 echo [无] >> "%diff_file%"
+
+:: 提取缺少的软件到单独文件用于安装
+set "missing_software=%temp_dir%\missing_software.txt"
+echo 在对比电脑上安装但在当前电脑上缺少的软件: > "%missing_software%"
+set found_missing=0
+for /f "usebackq tokens=*" %%a in ("%compare_list_clean%") do (
+    set found=0
+    for /f "usebackq tokens=*" %%b in ("%current_list_clean%") do (
+        if "%%a"=="%%b" set found=1
+    )
+    if !found!==0 (
+        echo %%a >> "%missing_software%"
+        set found_missing=1
+    )
+)
+
+echo.
+echo 比较完成！差异报告已保存到:
+echo %diff_file%
+echo.
+echo 正在打开差异报告...
+start notepad "%diff_file%"
+
+echo.
+pause
+goto menu
+
+:install_missing
+cls
+echo ===================================================
+echo             安装缺少的软件
+echo ===================================================
+echo.
+
+if not exist "%missing_software%" (
+    echo 错误: 未找到缺少软件的列表。
+    echo 请先运行第2步导入对比并生成差异报告。
+    echo.
+    pause
+    goto menu
+)
+
+:: 检查缺少的软件列表是否为空
+set "is_empty=1"
+for /f "usebackq tokens=*" %%a in ("%missing_software%") do (
+    set "line=%%a"
+    if not "!line:~0,2!"=="在对" (
+        set "is_empty=0"
+    )
+)
+
+if "%is_empty%"=="1" (
+    echo 没有发现缺少的软件。
+    echo 当前电脑已包含对比电脑上的所有软件。
+    echo.
+    pause
+    goto menu
+)
+
+echo 以下是当前电脑缺少的软件:
+echo.
+type "%missing_software%" | findstr /v "在对比电脑上安装但在当前电脑上缺少的软件:"
+echo.
+echo 请选择安装方式:
+echo.
+echo [1] 安装所有缺少的软件
+echo [2] 选择性安装
+echo [3] 返回主菜单
+echo.
+set /p install_choice=请输入选项(1-3): 
+
+if "%install_choice%"=="1" goto install_all
+if "%install_choice%"=="2" goto install_selective
+if "%install_choice%"=="3" goto menu
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto install_missing
+
+:install_all
+cls
+echo ===================================================
+echo             安装所有缺少的软件
+echo ===================================================
+echo.
+
+:: 检查是否以管理员身份运行
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 警告: 此脚本未以管理员身份运行，某些软件可能无法正确安装。
+    echo 建议以管理员身份运行此脚本。
+    echo.
+    choice /C YN /M "是否继续？(Y/N)"
+    if !ERRORLEVEL! EQU 2 goto install_missing
+    echo.
+)
+
+echo 开始安装所有缺少的软件...
+echo.
+
+set installed=0
+set failed=0
+
+for /f "usebackq skip=1 tokens=*" %%a in ("%missing_software%") do (
+    set "app_id=%%a"
+    echo 正在安装: !app_id! ...
+    winget install --id "!app_id!" --accept-source-agreements --accept-package-agreements
+    
+    if !ERRORLEVEL! EQU 0 (
+        set /a installed+=1
+        echo [成功] !app_id! 安装完成
+    ) else (
+        set /a failed+=1
+        echo [失败] !app_id! 安装失败，错误代码: !ERRORLEVEL!
+    )
+    echo.
+)
+
+echo 安装完成！成功: %installed%，失败: %failed%
+echo.
+pause
+goto menu
+
+:install_selective
+cls
+echo ===================================================
+echo             选择性安装缺少的软件
+echo ===================================================
+echo.
+
+:: 检查是否以管理员身份运行
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 警告: 此脚本未以管理员身份运行，某些软件可能无法正确安装。
+    echo 建议以管理员身份运行此脚本。
+    echo.
+    choice /C YN /M "是否继续？(Y/N)"
+    if !ERRORLEVEL! EQU 2 goto install_missing
+    echo.
+)
+
+echo 请输入要安装的软件ID (每次一个):
+echo 输入 'exit' 返回主菜单
+echo.
+echo 缺少的软件列表:
+echo ----------------------------------------
+type "%missing_software%" | findstr /v "在对比电脑上安装但在当前电脑上缺少的软件:"
+echo ----------------------------------------
+echo.
+
+:install_loop
+set /p app_id=请输入软件ID: 
+
+if /i "%app_id%"=="exit" goto menu
+
+if "%app_id%"=="" (
+    echo 软件ID不能为空！
+    goto install_loop
+)
+
+echo.
+echo 正在安装: %app_id% ...
+winget install --id "%app_id%" --accept-source-agreements --accept-package-agreements
+
+if %ERRORLEVEL% EQU 0 (
+    echo [成功] %app_id% 安装完成
+) else (
+    echo [失败] %app_id% 安装失败，错误代码: %ERRORLEVEL%
+)
+echo.
+
+goto install_loop
+
+:cleanup
+cls
+echo ===================================================
+echo             删除临时文件
+echo ===================================================
+echo.
+echo 确定要删除所有临时文件吗?
+echo 这将删除导出的软件列表和差异报告。
+choice /C YN /M "确认删除? (Y/N)"
+if %ERRORLEVEL% EQU 2 goto menu
+
+echo.
+echo 正在删除临时文件...
+if exist "%temp_dir%" (
+    rd /s /q "%temp_dir%" >nul 2>&1
+    echo 临时文件已删除。
+) else (
+    echo 没有找到临时文件。
+)
+
+echo.
+pause
+goto menu
+
+:end
+echo.
+echo 感谢使用Windows软件差异比较工具！
+echo.
+exit /b 0 
+:==============================================================================
+:: END OF winget_diff.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_export_import.bat
+:==============================================================================
+
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo      Windows软件导出导入工具 (基于WinGet)
+echo ===================================================
+echo.
+
+:: 检查WinGet是否安装
+where winget >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 未找到WinGet，请确保您的Windows版本支持WinGet并已安装。
+    echo WinGet在Windows 10 1709及更高版本中可用。
+    goto :EOF
+)
+
+:: 设置导出文件名
+set "export_file=%~dp0installed_software.json"
+
+:menu
+echo 请选择操作:
+echo.
+echo [1] 导出已安装的软件列表
+echo [2] 导入软件列表并安装
+echo [3] 查看已保存的软件列表
+echo [4] 退出
+echo.
+choice /C 1234 /M "请输入选项(1-4):"
+
+if %ERRORLEVEL% EQU 1 goto export
+if %ERRORLEVEL% EQU 2 goto import
+if %ERRORLEVEL% EQU 3 goto view
+if %ERRORLEVEL% EQU 4 goto end
+
+:export
+echo.
+echo 正在导出已安装的软件列表...
+if exist "%export_file%" (
+    echo.
+    echo 警告: 文件 %export_file% 已存在
+    choice /C YN /M "是否覆盖? (Y/N)"
+    if !ERRORLEVEL! EQU 2 goto menu
+)
+
+winget export -o "%export_file%" --accept-source-agreements
+
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo 导出成功! 文件保存在: %export_file%
+) else (
+    echo.
+    echo 导出失败，错误代码: %ERRORLEVEL%
+)
+echo.
+pause
+goto menu
+
+:import
+echo.
+if not exist "%export_file%" (
+    echo 错误: 未找到软件列表文件 %export_file%
+    echo 请先导出软件列表或将列表文件放在当前目录。
+    echo.
+    pause
+    goto menu
+)
+
+echo 找到软件列表文件: %export_file%
+echo.
+choice /C YN /M "是否开始导入并安装? (Y/N)"
+if %ERRORLEVEL% EQU 2 goto menu
+
+echo.
+echo 正在导入软件列表并安装...
+echo.
+
+:: 检查是否以管理员身份运行
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 警告: 此脚本未以管理员身份运行，某些软件可能无法正确安装。
+    echo 建议以管理员身份运行此脚本。
+    echo.
+    choice /C YN /M "是否继续？(Y/N)"
+    if !ERRORLEVEL! EQU 2 goto menu
+    echo.
+)
+
+:: 创建日志文件
+set "logfile=%~dp0winget_import_log_%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt"
+set "logfile=%logfile: =0%"
+echo 日志文件将保存在: %logfile%
+echo.
+
+:: 初始化日志文件
+echo Windows软件导入安装日志 - %date% %time% > "%logfile%"
+echo ============================================== >> "%logfile%"
+echo. >> "%logfile%"
+
+:: 执行导入安装
+winget import -i "%export_file%" --accept-package-agreements --accept-source-agreements >> "%logfile%" 2>&1
+
+echo.
+echo 导入安装完成！详细日志请查看: %logfile%
+echo.
+pause
+goto menu
+
+:view
+echo.
+if not exist "%export_file%" (
+    echo 错误: 未找到软件列表文件 %export_file%
+    echo 请先导出软件列表。
+    echo.
+    pause
+    goto menu
+)
+
+echo 软件列表内容:
+echo ============================================
+type "%export_file%" | findstr "PackageIdentifier"
+echo ============================================
+echo.
+pause
+goto menu
+
+:end
+echo.
+echo 感谢使用WinGet导出导入工具!
+echo.
+exit /b 0 
+:==============================================================================
+:: END OF winget_export_import.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_install.bat
+:==============================================================================
+
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo     Windows软件自动安装脚本 (基于WinGet)
+echo ===================================================
+echo.
+
+:: 检查WinGet是否安装
+where winget >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 未找到WinGet，请确保您的Windows版本支持WinGet并已安装。
+    echo WinGet在Windows 10 1709及更高版本中可用。
+    echo 如果您确定已安装，请尝试使用以下命令注册：
+    echo Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+    goto :EOF
+)
+
+:: 检查是否以管理员身份运行
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 警告: 此脚本未以管理员身份运行，某些软件可能无法正确安装。
+    echo 建议以管理员身份运行此脚本。
+    echo.
+    choice /C YN /M "是否继续？(Y/N)"
+    if !ERRORLEVEL! EQU 2 goto :EOF
+    echo.
+)
+
+echo WinGet版本信息:
+winget --version
+echo.
+
+:: 创建日志文件
+set "logfile=%~dp0winget_install_log_%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt"
+set "logfile=%logfile: =0%"
+echo 日志文件将保存在: %logfile%
+echo.
+
+:: 初始化日志文件
+echo Windows软件自动安装日志 - %date% %time% > "%logfile%"
+echo ============================================== >> "%logfile%"
+echo. >> "%logfile%"
+
+:: 常用软件列表 - 可以根据需求修改
+set "software_list=常用软件"
+echo 将要安装的软件包括:
+echo ---------------------------------------------
+
+:: 系统工具
+echo 系统工具:
+echo - Microsoft.PowerToys
+echo - Microsoft.WindowsTerminal
+echo - CPUID.CPU-Z
+echo - REALiX.HWiNFO
+echo - Nvidia.GeForceExperience
+echo - Twilio.Authy
+echo - TechPowerUp.GPU-Z
+echo - 7zip.7zip
+echo - WinSCP.WinSCP
+echo - voidtools.Everything
+echo - Notepad++.Notepad++
+echo.
+
+:: 浏览器
+echo 浏览器:
+echo - Google.Chrome
+echo - Mozilla.Firefox
+echo - Microsoft.Edge
+echo.
+
+:: 开发工具
+echo 开发工具:
+echo - Git.Git
+echo - Microsoft.VisualStudioCode
+echo - Python.Python.3.12
+echo - JetBrains.PyCharm.Community
+echo - JetBrains.IntelliJIDEA.Community
+echo.
+
+:: 通讯工具
+echo 通讯工具:
+echo - Tencent.WeChat
+echo - Tencent.QQ
+echo - Tencent.TencentMeeting
+echo - Alibaba.DingTalk
+echo.
+
+:: 其他工具
+echo 其他工具:
+echo - Bandisoft.Bandizip
+echo - ByteDance.Douyin
+echo - Baidu.BaiduNetdisk
+echo - Baidu.BaiduTranslate
+echo - Alibaba.aDrive
+echo.
+
+echo ---------------------------------------------
+echo.
+choice /C YN /M "是否继续安装？(Y/N)"
+if %ERRORLEVEL% EQU 2 goto :EOF
+echo.
+
+echo 开始安装软件...
+echo.
+
+:: 系统工具
+echo 正在安装系统工具...
+call :install_app "Microsoft.PowerToys" "PowerToys"
+call :install_app "Microsoft.WindowsTerminal" "Windows Terminal"
+call :install_app "CPUID.CPU-Z" "CPU-Z"
+call :install_app "REALiX.HWiNFO" "HWiNFO"
+call :install_app "Nvidia.GeForceExperience" "GeForce Experience"
+call :install_app "Twilio.Authy" "Authy"
+call :install_app "TechPowerUp.GPU-Z" "GPU-Z"
+call :install_app "7zip.7zip" "7-Zip"
+call :install_app "WinSCP.WinSCP" "WinSCP"
+call :install_app "voidtools.Everything" "Everything"
+call :install_app "Notepad++.Notepad++" "Notepad++"
+
+:: 浏览器
+echo 正在安装浏览器...
+call :install_app "Google.Chrome" "Google Chrome"
+call :install_app "Mozilla.Firefox" "Mozilla Firefox"
+call :install_app "Microsoft.Edge" "Microsoft Edge"
+
+:: 开发工具
+echo 正在安装开发工具...
+call :install_app "Git.Git" "Git"
+call :install_app "Microsoft.VisualStudioCode" "Visual Studio Code"
+call :install_app "Python.Python.3.12" "Python 3.12"
+call :install_app "JetBrains.PyCharm.Community" "PyCharm Community"
+call :install_app "JetBrains.IntelliJIDEA.Community" "IntelliJ IDEA Community"
+
+:: 通讯工具
+echo 正在安装通讯工具...
+call :install_app "Tencent.WeChat" "WeChat"
+call :install_app "Tencent.QQ" "QQ"
+call :install_app "Tencent.TencentMeeting" "Tencent Meeting"
+call :install_app "Alibaba.DingTalk" "DingTalk"
+
+:: 其他工具
+echo 正在安装其他工具...
+call :install_app "Bandisoft.Bandizip" "Bandizip"
+call :install_app "ByteDance.Douyin" "Douyin"
+call :install_app "Baidu.BaiduNetdisk" "Baidu Netdisk"
+call :install_app "Baidu.BaiduTranslate" "Baidu Translate"
+call :install_app "Alibaba.aDrive" "Alibaba Drive"
+
+echo.
+echo 所有软件安装已完成！
+echo 详细日志请查看: %logfile%
+
+:: 提示按任意键退出
+echo.
+pause
+goto :EOF
+
+:install_app
+set "app_id=%~1"
+set "app_name=%~2"
+echo 正在安装 %app_name%...
+echo [%date% %time%] 正在安装 %app_name% (%app_id%)... >> "%logfile%"
+winget install --id %app_id% --accept-source-agreements --accept-package-agreements >> "%logfile%" 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo [成功] %app_name% 安装完成
+    echo [%date% %time%] [成功] %app_name% 安装完成 >> "%logfile%"
+) else (
+    echo [失败] %app_name% 安装失败，错误代码: %ERRORLEVEL%
+    echo [%date% %time%] [失败] %app_name% 安装失败，错误代码: %ERRORLEVEL% >> "%logfile%"
+)
+echo. >> "%logfile%"
+echo.
+goto :EOF 
+:==============================================================================
+:: END OF winget_install.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_master.bat
+:==============================================================================
+
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo      Windows软件管理中心 (基于WinGet)
+echo ===================================================
+echo                 v1.0.0
+echo.
+
+:: 检查WinGet是否安装
+where winget >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 未找到WinGet，请确保您的Windows版本支持WinGet并已安装。
+    echo WinGet在Windows 10 1709及更高版本中可用。
+    echo 您可以从Microsoft Store安装"应用安装程序"或访问GitHub下载WinGet。
+    echo.
+    echo GitHub链接: https://github.com/microsoft/winget-cli/releases
+    echo.
+    pause
+    goto :EOF
+)
+
+:: 设置脚本路径
+set "script_dir=%~dp0"
+set "update_script=%script_dir%winget_update.bat"
+set "export_import_script=%script_dir%winget_export_import.bat"
+set "categories_script=%script_dir%winget_categories.bat"
+set "search_script=%script_dir%winget_search.bat"
+set "scheduled_tasks_script=%script_dir%winget_scheduled_tasks.bat"
+
+:menu
+cls
+echo ===================================================
+echo               Windows软件管理中心
+echo ===================================================
+echo.
+echo 请选择要执行的操作:
+echo.
+echo [1] 搜索并安装软件          [7] 查看已安装软件
+echo [2] 更新所有软件            [8] 系统配置管理
+echo [3] 分类安装软件            [9] WinGet参数帮助
+echo [4] 软件导出导入           [10] 关于本工具
+echo [5] 创建定时更新任务       [11] 退出
+echo [6] 卸载软件
+echo.
+set /p choice=请输入选项(1-11): 
+
+if "%choice%"=="1" goto search
+if "%choice%"=="2" goto update
+if "%choice%"=="3" goto categories
+if "%choice%"=="4" goto export_import
+if "%choice%"=="5" goto scheduled_tasks
+if "%choice%"=="6" goto uninstall
+if "%choice%"=="7" goto list_installed
+if "%choice%"=="8" goto system_config
+if "%choice%"=="9" goto help
+if "%choice%"=="10" goto about
+if "%choice%"=="11" goto end
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto menu
+
+:search
+if exist "%search_script%" (
+    call "%search_script%"
+) else (
+    echo 错误: 未找到搜索脚本文件: %search_script%
+    echo 请确保所有脚本文件都在同一目录。
+    pause
+)
+goto menu
+
+:update
+if exist "%update_script%" (
+    call "%update_script%"
+) else (
+    echo 错误: 未找到更新脚本文件: %update_script%
+    echo 请确保所有脚本文件都在同一目录。
+    pause
+)
+goto menu
+
+:categories
+if exist "%categories_script%" (
+    call "%categories_script%"
+) else (
+    echo 错误: 未找到分类脚本文件: %categories_script%
+    echo 请确保所有脚本文件都在同一目录。
+    pause
+)
+goto menu
+
+:export_import
+if exist "%export_import_script%" (
+    call "%export_import_script%"
+) else (
+    echo 错误: 未找到导出导入脚本文件: %export_import_script%
+    echo 请确保所有脚本文件都在同一目录。
+    pause
+)
+goto menu
+
+:scheduled_tasks
+:: 检查是否以管理员身份运行
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 错误: 创建计划任务需要管理员权限。
+    echo 请右键点击此脚本并选择"以管理员身份运行"。
+    pause
+    goto menu
+)
+
+if exist "%scheduled_tasks_script%" (
+    call "%scheduled_tasks_script%"
+) else (
+    echo 错误: 未找到计划任务脚本文件: %scheduled_tasks_script%
+    echo 请确保所有脚本文件都在同一目录。
+    pause
+)
+goto menu
+
+:uninstall
+cls
+echo ===================================================
+echo               卸载已安装的软件
+echo ===================================================
+echo.
+echo 请选择卸载方式:
+echo.
+echo [1] 按名称搜索并卸载
+echo [2] 查看所有已安装软件并选择卸载
+echo [3] 返回主菜单
+echo.
+set /p uninstall_choice=请输入选项(1-3): 
+
+if "%uninstall_choice%"=="1" goto uninstall_search
+if "%uninstall_choice%"=="2" goto uninstall_list
+if "%uninstall_choice%"=="3" goto menu
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto uninstall
+
+:uninstall_search
+cls
+echo ===================================================
+echo              按名称搜索并卸载软件
+echo ===================================================
+echo.
+echo 请输入要卸载的软件名称或关键词:
+set /p uninstall_keyword=搜索关键词: 
+
+if "%uninstall_keyword%"=="" (
+    echo 搜索关键词不能为空！
+    pause
+    goto uninstall_search
+)
+
+echo.
+echo 搜索匹配 "%uninstall_keyword%" 的已安装软件...
+echo.
+
+:: 搜索已安装的软件
+winget list "%uninstall_keyword%"
+
+echo.
+echo 是否要卸载上述列表中的软件？
+choice /C YN /M "卸载软件(Y/N):"
+if %ERRORLEVEL% EQU 2 goto uninstall
+
+echo.
+set /p app_id=请输入要卸载的软件ID(精确ID): 
+if "%app_id%"=="" (
+    echo 软件ID不能为空！
+    pause
+    goto uninstall_search
+)
+
+echo.
+echo 确定要卸载 %app_id% 吗?
+choice /C YN /M "确认卸载(Y/N):"
+if %ERRORLEVEL% EQU 2 goto uninstall_search
+
+echo.
+echo 正在卸载 %app_id%...
+echo.
+
+winget uninstall --id "%app_id%" --accept-source-agreements
+
+echo.
+echo 卸载完成。
+pause
+goto uninstall
+
+:uninstall_list
+cls
+echo ===================================================
+echo              查看并卸载已安装软件
+echo ===================================================
+echo.
+echo 正在获取已安装的软件列表...
+echo 这可能需要一些时间，请耐心等待...
+echo.
+
+winget list
+
+echo.
+echo 是否要卸载上述列表中的软件？
+choice /C YN /M "卸载软件(Y/N):"
+if %ERRORLEVEL% EQU 2 goto uninstall
+
+echo.
+set /p app_id=请输入要卸载的软件ID(精确ID): 
+if "%app_id%"=="" (
+    echo 软件ID不能为空！
+    pause
+    goto uninstall_list
+)
+
+echo.
+echo 确定要卸载 %app_id% 吗?
+choice /C YN /M "确认卸载(Y/N):"
+if %ERRORLEVEL% EQU 2 goto uninstall_list
+
+echo.
+echo 正在卸载 %app_id%...
+echo.
+
+winget uninstall --id "%app_id%" --accept-source-agreements
+
+echo.
+echo 卸载完成。
+pause
+goto uninstall
+
+:list_installed
+cls
+echo ===================================================
+echo              查看已安装的软件
+echo ===================================================
+echo.
+echo 请选择查看方式:
+echo.
+echo [1] 查看所有已安装软件
+echo [2] 按名称搜索已安装软件
+echo [3] 返回主菜单
+echo.
+set /p list_choice=请输入选项(1-3): 
+
+if "%list_choice%"=="1" goto list_all
+if "%list_choice%"=="2" goto list_search
+if "%list_choice%"=="3" goto menu
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto list_installed
+
+:list_all
+cls
+echo ===================================================
+echo              所有已安装软件列表
+echo ===================================================
+echo.
+echo 正在获取已安装的软件列表...
+echo 这可能需要一些时间，请耐心等待...
+echo.
+
+winget list
+
+echo.
+echo [1] 返回上级菜单
+echo [2] 返回主菜单
+echo.
+set /p back_choice=请输入选项(1-2): 
+
+if "%back_choice%"=="1" goto list_installed
+if "%back_choice%"=="2" goto menu
+
+goto list_all
+
+:list_search
+cls
+echo ===================================================
+echo              搜索已安装软件
+echo ===================================================
+echo.
+echo 请输入要搜索的软件名称或关键词:
+set /p list_keyword=搜索关键词: 
+
+if "%list_keyword%"=="" (
+    echo 搜索关键词不能为空！
+    pause
+    goto list_search
+)
+
+echo.
+echo 搜索匹配 "%list_keyword%" 的已安装软件...
+echo.
+
+winget list "%list_keyword%"
+
+echo.
+echo [1] 继续搜索
+echo [2] 返回上级菜单
+echo [3] 返回主菜单
+echo.
+set /p back_choice=请输入选项(1-3): 
+
+if "%back_choice%"=="1" goto list_search
+if "%back_choice%"=="2" goto list_installed
+if "%back_choice%"=="3" goto menu
+
+goto list_search
+
+:system_config
+cls
+echo ===================================================
+echo                系统配置管理
+echo ===================================================
+echo.
+echo 请选择要执行的操作:
+echo.
+echo [1] 查看WinGet配置
+echo [2] 查看WinGet源
+echo [3] 添加WinGet源
+echo [4] 重置WinGet源
+echo [5] 返回主菜单
+echo.
+set /p config_choice=请输入选项(1-5): 
+
+if "%config_choice%"=="1" goto view_config
+if "%config_choice%"=="2" goto view_sources
+if "%config_choice%"=="3" goto add_source
+if "%config_choice%"=="4" goto reset_sources
+if "%config_choice%"=="5" goto menu
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto system_config
+
+:view_config
+cls
+echo ===================================================
+echo                查看WinGet配置
+echo ===================================================
+echo.
+echo 正在获取WinGet配置信息...
+echo.
+
+winget settings
+
+echo.
+pause
+goto system_config
+
+:view_sources
+cls
+echo ===================================================
+echo                查看WinGet源
+echo ===================================================
+echo.
+echo 正在获取WinGet源信息...
+echo.
+
+winget source list
+
+echo.
+pause
+goto system_config
+
+:add_source
+cls
+echo ===================================================
+echo                添加WinGet源
+echo ===================================================
+echo.
+echo 请输入要添加的源信息:
+echo.
+set /p source_name=源名称: 
+set /p source_url=源URL: 
+
+if "%source_name%"=="" (
+    echo 源名称不能为空！
+    pause
+    goto add_source
+)
+
+if "%source_url%"=="" (
+    echo 源URL不能为空！
+    pause
+    goto add_source
+)
+
+echo.
+echo 正在添加源 "%source_name%"...
+echo.
+
+winget source add %source_name% %source_url%
+
+echo.
+pause
+goto system_config
+
+:reset_sources
+cls
+echo ===================================================
+echo                重置WinGet源
+echo ===================================================
+echo.
+echo 确定要重置所有WinGet源吗?
+echo 这将删除所有自定义源并恢复默认源。
+echo.
+choice /C YN /M "重置源(Y/N):"
+if %ERRORLEVEL% EQU 2 goto system_config
+
+echo.
+echo 正在重置WinGet源...
+echo.
+
+winget source reset --force
+
+echo.
+echo 重置完成。
+pause
+goto system_config
+
+:help
+cls
+echo ===================================================
+echo                WinGet参数帮助
+echo ===================================================
+echo.
+echo 选择要查看的命令帮助:
+echo.
+echo [1] winget （整体帮助）
+echo [2] winget install （安装命令）
+echo [3] winget search （搜索命令）
+echo [4] winget list （列表命令）
+echo [5] winget upgrade （更新命令）
+echo [6] winget uninstall （卸载命令）
+echo [7] winget export/import （导出导入命令）
+echo [8] winget source （源管理命令）
+echo [9] 返回主菜单
+echo.
+set /p help_choice=请输入选项(1-9): 
+
+if "%help_choice%"=="1" (
+    cls
+    winget --help
+)
+if "%help_choice%"=="2" (
+    cls
+    winget install --help
+)
+if "%help_choice%"=="3" (
+    cls
+    winget search --help
+)
+if "%help_choice%"=="4" (
+    cls
+    winget list --help
+)
+if "%help_choice%"=="5" (
+    cls
+    winget upgrade --help
+)
+if "%help_choice%"=="6" (
+    cls
+    winget uninstall --help
+)
+if "%help_choice%"=="7" (
+    cls
+    echo ===== EXPORT 命令帮助 =====
+    winget export --help
+    echo.
+    echo ===== IMPORT 命令帮助 =====
+    winget import --help
+)
+if "%help_choice%"=="8" (
+    cls
+    winget source --help
+)
+if "%help_choice%"=="9" goto menu
+
+echo.
+pause
+goto help
+
+:about
+cls
+echo ===================================================
+echo               关于Windows软件管理中心
+echo ===================================================
+echo.
+echo 版本: 1.0.0
+echo.
+echo 功能概述:
+echo - 搜索并安装Windows软件
+echo - 批量更新已安装的软件
+echo - 按分类安装常用软件
+echo - 导出导入软件配置（多电脑同步）
+echo - 设置自动更新计划任务
+echo - 卸载管理已安装软件
+echo - 系统配置与源管理
+echo.
+echo 本工具基于微软WinGet包管理器，为Windows系统提供简便的
+echo 软件管理解决方案。适用于个人电脑自动化部署和日常维护。
+echo.
+echo 作者: 自动安装程序生成工具
+echo.
+pause
+goto menu
+
+:end
+echo.
+echo 感谢使用Windows软件管理中心！
+echo.
+exit /b 0 
+:==============================================================================
+:: END OF winget_master.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_repair.bat
+:==============================================================================
+
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo     Windows软件包管理器修复工具 (WinGet修复)
+echo ===================================================
+echo.
+
+:: 获取管理员权限
+net session >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo 此工具需要管理员权限才能执行修复操作。
+    echo 请右键点击此脚本并选择"以管理员身份运行"。
+    pause
+    exit /b 1
+)
+
+:: 设置日志文件
+set "log_dir=%TEMP%\winget_repair_logs"
+if not exist "%log_dir%" mkdir "%log_dir%"
+
+set "log_file=%log_dir%\repair_log_%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt"
+set "log_file=%log_file: =0%"
+
+echo Windows软件包管理器修复日志 > "%log_file%"
+echo 日期: %date% 时间: %time% >> "%log_file%"
+echo ================================================== >> "%log_file%"
+echo. >> "%log_file%"
+
+:menu
+cls
+echo 请选择要执行的修复操作:
+echo.
+echo [1] 检查WinGet状态
+echo [2] 重置WinGet源
+echo [3] 重置应用商店缓存
+echo [4] 修复WinGet组件
+echo [5] 修复网络连接问题
+echo [6] 清理WinGet缓存
+echo [7] 重新安装WinGet
+echo [8] 查看诊断信息
+echo [9] 退出
+echo.
+set /p choice=请输入选项(1-9): 
+
+if "%choice%"=="1" goto check_status
+if "%choice%"=="2" goto reset_sources
+if "%choice%"=="3" goto reset_store_cache
+if "%choice%"=="4" goto repair_components
+if "%choice%"=="5" goto fix_network
+if "%choice%"=="6" goto clean_cache
+if "%choice%"=="7" goto reinstall_winget
+if "%choice%"=="8" goto diagnostics
+if "%choice%"=="9" goto end
+
+echo.
+echo 无效的选择，请重试。
+timeout /t 2 >nul
+goto menu
+
+:check_status
+cls
+echo ===================================================
+echo                检查WinGet状态
+echo ===================================================
+echo.
+
+echo 正在检查WinGet是否已安装...
+echo.
+
+echo 检查WinGet版本: >> "%log_file%"
+where winget >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo WinGet已安装。
+    echo WinGet已安装。 >> "%log_file%"
+    echo.
+    echo WinGet版本信息:
+    winget --version
+    winget --version >> "%log_file%"
+    echo. >> "%log_file%"
+) else (
+    echo WinGet未安装或无法找到。
+    echo WinGet未安装或无法找到。 >> "%log_file%"
+    echo. >> "%log_file%"
+    goto winget_not_found
+)
+
+echo.
+echo 检查WinGet源状态...
+echo.
+
+echo 检查WinGet源状态: >> "%log_file%"
+echo. >> "%log_file%"
+
+winget source list
+winget source list >> "%log_file%" 2>&1
+echo. >> "%log_file%"
+
+echo.
+echo 检查应用安装器服务状态...
+echo.
+
+echo 检查应用安装器服务状态: >> "%log_file%"
+sc query appinstaller > nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo 应用安装器服务已安装。
+    echo 应用安装器服务已安装。 >> "%log_file%"
+) else (
+    echo 应用安装器服务未安装或无法访问。
+    echo 应用安装器服务未安装或无法访问。 >> "%log_file%"
+)
+echo. >> "%log_file%"
+
+echo.
+echo 检查Microsoft Store状态...
+echo.
+
+echo 检查Microsoft Store状态: >> "%log_file%"
+powershell -Command "Get-AppxPackage -Name Microsoft.WindowsStore" > nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo Microsoft Store已安装。
+    echo Microsoft Store已安装。 >> "%log_file%"
+) else (
+    echo Microsoft Store未安装或已损坏。
+    echo Microsoft Store未安装或已损坏。 >> "%log_file%"
+)
+echo. >> "%log_file%"
+
+echo.
+echo 检查完成。请查看上面的信息确定WinGet的状态。
+echo 如果发现问题，请选择相应的修复选项。
+echo.
+pause
+goto menu
+
+:reset_sources
+cls
+echo ===================================================
+echo                重置WinGet源
+echo ===================================================
+echo.
+
+echo 正在检查WinGet源状态...
+echo.
+winget source list
+echo.
+
+echo 是否要重置所有WinGet源？这将删除所有自定义源并恢复默认源。
+choice /C YN /M "确认重置？(Y/N)"
+if %ERRORLEVEL% EQU 2 goto menu
+
+echo.
+echo 正在重置WinGet源...
+echo 重置WinGet源: >> "%log_file%"
+winget source reset --force
+echo 退出代码: %ERRORLEVEL% >> "%log_file%"
+echo. >> "%log_file%"
+
+echo.
+echo 重置完成。正在验证源状态...
+echo.
+echo 重置后源状态: >> "%log_file%"
+winget source list
+winget source list >> "%log_file%"
+echo. >> "%log_file%"
+
+echo.
+pause
+goto menu
+
+:reset_store_cache
+cls
+echo ===================================================
+echo               重置应用商店缓存
+echo ===================================================
+echo.
+
+echo 警告: 此操作将重置Microsoft Store和应用安装器的缓存。
+echo 这可能会导致您需要重新登录商店账户。
+echo.
+choice /C YN /M "确认继续？(Y/N)"
+if %ERRORLEVEL% EQU 2 goto menu
+
+echo.
+echo 正在重置Microsoft Store缓存...
+echo 重置Microsoft Store缓存: >> "%log_file%"
+echo.
+
+echo 1. 停止Store相关服务...
+net stop wuauserv > nul 2>&1
+net stop bits > nul 2>&1
+net stop appidsvc > nul 2>&1
+echo 服务已停止。
+
+echo 2. 清理Store缓存...
+rd /s /q "%localappdata%\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalCache" 2> nul
+rd /s /q "%localappdata%\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\LocalState" 2> nul
+echo 缓存已清理。
+
+echo 3. 重启服务...
+net start wuauserv > nul 2>&1
+net start bits > nul 2>&1
+net start appidsvc > nul 2>&1
+echo 服务已重启。
+
+echo 4. 重置应用安装器缓存...
+powershell -Command "Get-AppxPackage -Name Microsoft.DesktopAppInstaller | Reset-AppxPackage" >> "%log_file%" 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo 应用安装器已重置。
+) else (
+    echo 重置应用安装器时出错，错误代码: %ERRORLEVEL%
+)
+
+echo.
+echo 缓存重置完成。建议重启电脑以完成修复过程。
+echo 缓存重置完成。 >> "%log_file%"
+echo. >> "%log_file%"
+
+echo.
+pause
+goto menu
+
+:repair_components
+cls
+echo ===================================================
+echo              修复WinGet组件
+echo ===================================================
+echo.
+
+echo 此操作将尝试修复WinGet和相关组件。
+echo.
+
+echo 1. 验证WinGet基本功能...
+where winget >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo WinGet未安装或无法找到，请先尝试重新安装WinGet。
+    pause
+    goto menu
+)
+
+echo 2. 检查Windows应用安装器包...
+echo 检查Windows应用安装器包: >> "%log_file%"
+powershell -Command "Get-AppxPackage -Name Microsoft.DesktopAppInstaller" | findstr "PackageFullName" > nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 未找到Windows应用安装器包。
+    echo 未找到Windows应用安装器包。 >> "%log_file%"
+    echo 将尝试重新安装...
+    echo 尝试重新安装应用安装器... >> "%log_file%"
+    
+    echo.
+    echo 正在尝试从Microsoft Store安装应用安装器...
+    powershell -Command "Start-Process 'ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1'"
+    echo 请在Microsoft Store中完成安装，然后按任意键继续...
+    pause > nul
+) else (
+    echo Windows应用安装器包已找到。
+    echo Windows应用安装器包已找到。 >> "%log_file%"
+)
+echo. >> "%log_file%"
+
+echo 3. 修复WinGet注册表项...
+echo 修复WinGet注册表项: >> "%log_file%"
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /f > nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost" /v "EnableWebContentEvaluation" /t REG_DWORD /d 1 /f > nul 2>&1
+echo 注册表项已修复。
+echo 注册表项已修复。 >> "%log_file%"
+echo. >> "%log_file%"
+
+echo 4. 重置应用安装器...
+echo 重置应用安装器: >> "%log_file%"
+powershell -Command "Get-AppxPackage -Name Microsoft.DesktopAppInstaller | Reset-AppxPackage" >> "%log_file%" 2>&1
+echo 应用安装器已重置。
+echo. >> "%log_file%"
+
+echo 5. 验证修复结果...
+where winget >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo WinGet命令可用，修复可能已成功。
+    echo WinGet命令可用，修复可能已成功。 >> "%log_file%"
+    echo.
+    echo 验证WinGet版本:
+    winget --version
+    winget --version >> "%log_file%"
+) else (
+    echo WinGet命令仍然不可用，可能需要重新安装。
+    echo WinGet命令仍然不可用，可能需要重新安装。 >> "%log_file%"
+    echo 请尝试"重新安装WinGet"选项。
+)
+echo. >> "%log_file%"
+
+echo.
+echo 修复操作完成。建议重启电脑以完成修复过程。
+echo.
+pause
+goto menu
+
+:fix_network
+cls
+echo ===================================================
+echo              修复网络连接问题
+echo ===================================================
+echo.
+
+echo 此操作将尝试修复可能影响WinGet的网络问题。
+echo.
+
+echo 1. 检查网络连接...
+ping -n 1 www.microsoft.com > nul
+if %ERRORLEVEL% NEQ 0 (
+    echo 警告: 无法连接到Microsoft服务器。
+    echo 请确保您的网络连接正常工作。
+    echo.
+    pause
+    goto menu
+)
+
+echo 2. 重置网络设置...
+echo 重置网络设置: >> "%log_file%"
+echo a. 重置网络适配器...
+ipconfig /release > nul
+ipconfig /flushdns > nul
+ipconfig /renew > nul
+echo 网络适配器已重置。
+
+echo b. 重置Winsock...
+netsh winsock reset catalog >> "%log_file%" 2>&1
+echo Winsock已重置。
+
+echo c. 重置Windows防火墙...
+netsh advfirewall reset >> "%log_file%" 2>&1
+echo 防火墙已重置。
+
+echo d. 重置HTTP/HTTPS设置...
+netsh winhttp reset proxy >> "%log_file%" 2>&1
+echo HTTP设置已重置。
+echo. >> "%log_file%"
+
+echo 3. 配置WinGet源...
+echo 配置WinGet源: >> "%log_file%"
+winget source reset --force >> "%log_file%" 2>&1
+echo WinGet源已重置。
+echo. >> "%log_file%"
+
+echo 4. 验证网络连接...
+echo 验证网络连接: >> "%log_file%"
+ping www.microsoft.com -n 2 >> "%log_file%" 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo 网络连接正常。
+    echo 网络连接正常。 >> "%log_file%"
+) else (
+    echo 网络连接仍有问题，请检查网络设置或咨询网络管理员。
+    echo 网络连接仍有问题。 >> "%log_file%"
+)
+echo. >> "%log_file%"
+
+echo.
+echo 网络设置已重置。建议重启电脑以完成网络修复过程。
+echo.
+pause
+goto menu
+
+:clean_cache
+cls
+echo ===================================================
+echo               清理WinGet缓存
+echo ===================================================
+echo.
+
+echo 此操作将清理WinGet的缓存文件和临时数据。
+echo.
+choice /C YN /M "确认继续？(Y/N)"
+if %ERRORLEVEL% EQU 2 goto menu
+
+echo.
+echo 正在清理WinGet缓存...
+echo 清理WinGet缓存: >> "%log_file%"
+
+echo 1. 清理WinGet本地存储库缓存...
+set "local_cache=%LOCALAPPDATA%\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalCache\Microsoft\WinGet"
+if exist "%local_cache%" (
+    rd /s /q "%local_cache%" > nul 2>&1
+    mkdir "%local_cache%" > nul 2>&1
+    echo WinGet本地存储库缓存已清理。
+    echo WinGet本地存储库缓存已清理。 >> "%log_file%"
+) else (
+    echo 未找到WinGet本地缓存目录。
+    echo 未找到WinGet本地缓存目录。 >> "%log_file%"
+)
+
+echo 2. 清理WinGet源缓存...
+winget source reset --force > nul 2>&1
+echo WinGet源缓存已清理。
+echo WinGet源缓存已清理。 >> "%log_file%"
+
+echo 3. 清理临时下载文件...
+set "temp_files=%TEMP%\WinGet"
+if exist "%temp_files%" (
+    rd /s /q "%temp_files%" > nul 2>&1
+    echo WinGet临时文件已清理。
+    echo WinGet临时文件已清理。 >> "%log_file%"
+) else (
+    echo 未找到WinGet临时文件目录。
+    echo 未找到WinGet临时文件目录。 >> "%log_file%"
+)
+
+echo.
+echo WinGet缓存清理完成。
+echo WinGet缓存清理完成。 >> "%log_file%"
+echo. >> "%log_file%"
+
+echo.
+pause
+goto menu
+
+:reinstall_winget
+cls
+echo ===================================================
+echo               重新安装WinGet
+echo ===================================================
+echo.
+
+echo 此操作将尝试卸载并重新安装WinGet。
+echo.
+choice /C YN /M "确认继续？(Y/N)"
+if %ERRORLEVEL% EQU 2 goto menu
+
+echo.
+echo 1. 卸载现有的WinGet...
+echo 卸载现有的WinGet: >> "%log_file%"
+powershell -Command "Get-AppxPackage -Name Microsoft.DesktopAppInstaller | Remove-AppxPackage" >> "%log_file%" 2>&1
+
+if %ERRORLEVEL% EQU 0 (
+    echo WinGet已成功卸载。
+) else (
+    echo 卸载WinGet时出错，错误代码: %ERRORLEVEL%
+    echo 将继续尝试安装新版本。
+)
+
+echo 2. 提供安装选项...
+echo.
+echo 请选择WinGet安装方式:
+echo.
+echo [1] 从Microsoft Store安装 (推荐)
+echo [2] 从GitHub下载最新版本手动安装
+echo [3] 返回上级菜单
+echo.
+set /p install_choice=请输入选项(1-3): 
+
+if "%install_choice%"=="1" (
+    echo.
+    echo 正在打开Microsoft Store...
+    powershell -Command "Start-Process 'ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1'"
+    echo 请在Microsoft Store中完成安装，然后按任意键继续...
+    pause > nul
+) else if "%install_choice%"=="2" (
+    echo.
+    echo 正在打开GitHub下载页面...
+    start https://github.com/microsoft/winget-cli/releases
+    echo 请下载并安装最新版本的WinGet，然后按任意键继续...
+    pause > nul
+) else if "%install_choice%"=="3" (
+    goto menu
+) else (
+    echo 无效的选择，返回上级菜单...
+    timeout /t 2 >nul
+    goto reinstall_winget
+)
+
+echo 3. 验证安装...
+echo.
+echo 正在验证WinGet安装...
+where winget >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    echo WinGet已成功安装！
+    echo 版本信息:
+    winget --version
+    echo.
+    echo 重新安装成功。
+    echo WinGet已成功安装，版本: >> "%log_file%"
+    winget --version >> "%log_file%"
+) else (
+    echo WinGet安装验证失败。
+    echo 请确保已完成安装过程或尝试其他安装方法。
+    echo WinGet安装验证失败。 >> "%log_file%"
+)
+echo. >> "%log_file%"
+
+echo.
+pause
+goto menu
+
+:winget_not_found
+echo.
+echo WinGet未安装或无法找到。建议尝试以下解决方案:
+echo.
+echo [1] 从Microsoft Store安装应用安装器
+echo [2] 从GitHub下载WinGet最新版本
+echo [3] 返回主菜单
+echo.
+set /p install_choice=请输入选项(1-3): 
+
+if "%install_choice%"=="1" (
+    echo.
+    echo 正在打开Microsoft Store...
+    powershell -Command "Start-Process 'ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1'"
+    echo 请在Microsoft Store中完成安装，然后按任意键继续...
+    pause > nul
+    goto check_status
+) else if "%install_choice%"=="2" (
+    echo.
+    echo 正在打开GitHub下载页面...
+    start https://github.com/microsoft/winget-cli/releases
+    echo 请下载并安装最新版本的WinGet，然后按任意键继续...
+    pause > nul
+    goto check_status
+) else if "%install_choice%"=="3" (
+    goto menu
+) else (
+    echo 无效的选择，返回上级菜单...
+    timeout /t 2 >nul
+    goto menu
+)
+
+:diagnostics
+cls
+echo ===================================================
+echo               查看诊断信息
+echo ===================================================
+echo.
+
+echo 正在收集系统和WinGet诊断信息...
+echo.
+
+echo 诊断信息收集: >> "%log_file%"
+echo. >> "%log_file%"
+
+echo 1. 系统信息:
+echo 系统信息: >> "%log_file%"
+systeminfo | findstr /C:"OS" >> "%log_file%"
+echo. >> "%log_file%"
+
+echo 2. WinGet信息:
+echo WinGet信息: >> "%log_file%"
+where winget >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    winget --info >> "%log_file%" 2>&1
+) else (
+    echo WinGet未安装或不可用。 >> "%log_file%"
+)
+echo. >> "%log_file%"
+
+echo 3. 应用安装器包信息:
+echo 应用安装器包信息: >> "%log_file%"
+powershell -Command "Get-AppxPackage -Name Microsoft.DesktopAppInstaller" >> "%log_file%" 2>&1
+echo. >> "%log_file%"
+
+echo 4. WinGet源信息:
+echo WinGet源信息: >> "%log_file%"
+where winget >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    winget source list >> "%log_file%" 2>&1
+) else (
+    echo WinGet未安装或不可用。 >> "%log_file%"
+)
+echo. >> "%log_file%"
+
+echo 5. 网络连接状态:
+echo 网络连接状态: >> "%log_file%"
+ipconfig /all | findstr /C:"IPv4" >> "%log_file%"
+echo. >> "%log_file%"
+ping -n 2 www.microsoft.com >> "%log_file%" 2>&1
+echo. >> "%log_file%"
+
+echo 6. Windows更新服务状态:
+echo Windows更新服务状态: >> "%log_file%"
+sc query wuauserv >> "%log_file%" 2>&1
+echo. >> "%log_file%"
+
+echo 7. Microsoft Store服务状态:
+echo Microsoft Store服务状态: >> "%log_file%"
+powershell -Command "Get-AppxPackage -Name Microsoft.WindowsStore" >> "%log_file%" 2>&1
+echo. >> "%log_file%"
+
+echo.
+echo 诊断信息收集完成！
+echo 日志文件保存在: %log_file%
+echo.
+echo 是否要查看诊断日志文件?
+choice /C YN /M "查看日志文件? (Y/N)"
+if %ERRORLEVEL% EQU 1 (
+    start notepad "%log_file%"
+)
+
+echo.
+pause
+goto menu
+
+:end
+echo.
+echo 感谢使用Windows软件包管理器修复工具！
+echo 日志文件已保存在: %log_file%
+echo.
+exit /b 0
+
+:==============================================================================
+:: END OF winget_repair.bat
+:==============================================================================
+
+:==============================================================================
+:: START OF winget_report.bat
+:==============================================================================
+

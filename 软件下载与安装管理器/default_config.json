@@ -1,0 +1,23 @@
+{
+    "download_dir": "downloads",
+    "install_dir": null,
+    "max_workers": 4,
+    "software_list": [
+        {
+            "name": "chrome",
+            "enabled": true
+        },
+        {
+            "name": "python",
+            "enabled": true
+        },
+        {
+            "name": "vscode",
+            "enabled": true
+        },
+        {
+            "name": "notepadpp",
+            "enabled": true
+        }
+    ]
+}

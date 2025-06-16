@@ -1,0 +1,15 @@
+# GUI dependencies
+PyQt5>=5.15.0
+tkinter
+
+# File handling
+chardet>=4.0.0
+
+# Utility
+requests>=2.25.0
+tqdm>=4.60.0
+colorama>=0.4.4
+
+# Optional - uncomment if needed
+# pywin32>=300
+# psutil>=5.8.0 
